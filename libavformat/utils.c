@@ -3651,6 +3651,22 @@ void avformat_free_context(AVFormatContext *s)
     av_free(s);
 }
 
+void avformat_preclose_input(AVFormatContext **ps)
+{
+    AVFormatContext *s;
+
+    if (!ps || !*ps)
+        return;
+
+    s  = *ps;
+    
+    if (s->iformat) {
+        if (s->iformat->read_preclose) {
+            s->iformat->read_preclose(s);
+        }
+    }
+}
+
 void avformat_close_input(AVFormatContext **ps)
 {
     AVFormatContext *s;

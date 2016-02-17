@@ -53,6 +53,16 @@ static const struct RTSPStatusMessage {
     { 0,                          "NULL"                             }
 };
 
+static int rtsp_read_preclose(AVFormatContext *s)
+{
+    RTSPState *rt = s->priv_data;
+
+    if (!(rt->rtsp_flags & RTSP_FLAG_LISTEN)) {
+      ff_rtsp_send_cmd_async(s, "TEARDOWN", rt->control_uri, NULL);
+    }
+    return 0;
+}
+
 static int rtsp_read_close(AVFormatContext *s)
 {
     RTSPState *rt = s->priv_data;
@@ -966,6 +976,7 @@ AVInputFormat ff_rtsp_demuxer = {
     .read_probe     = rtsp_probe,
     .read_header    = rtsp_read_header,
     .read_packet    = rtsp_read_packet,
+    .read_preclose  = rtsp_read_preclose,
     .read_close     = rtsp_read_close,
     .read_seek      = rtsp_read_seek,
     .flags          = AVFMT_NOFILE,
